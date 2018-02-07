@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .getCharacteristic(CustomBluetoothProfile.AlertNotification.alertCharacteristic);
         bchar.setValue(new byte[]{0});
         if (!bluetoothGatt.writeCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed stop vibrate", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed stop vibratee", Toast.LENGTH_SHORT).show();
         }
     }
 

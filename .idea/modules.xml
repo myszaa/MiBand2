@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MiBandApp.iml" filepath="$PROJECT_DIR$/MiBandApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MiBand2.iml" filepath="$PROJECT_DIR$/MiBand2.iml" />
       <module fileurl="file://E:\OverallWorkspace\Studies Projects\AndroidStudio Project\MiBandApp\MiBandApp.iml" filepath="E:\OverallWorkspace\Studies Projects\AndroidStudio Project\MiBandApp\MiBandApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://E:\OverallWorkspace\Studies Projects\AndroidStudio Project\MiBandApp\app\app.iml" filepath="E:\OverallWorkspace\Studies Projects\AndroidStudio Project\MiBandApp\app\app.iml" />
