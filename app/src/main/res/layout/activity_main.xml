@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Physical Address"
-            android:text=""/>
+            android:text="E7:9B:48:E1:58:3E"/>
 
         <Button
             android:id="@+id/btnStartConnecting"
