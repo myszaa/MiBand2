@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothProfile;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,7 +34,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
+
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MyMiBandApp";
     Boolean isListeningHeartRate = false;
@@ -42,14 +45,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     BluetoothGatt bluetoothGatt;
     BluetoothDevice bluetoothDevice;
 
-    Button btnStartConnecting, btnGetBoundedDevice, btnStartVibrate, btnStopVibrate;
+    Button btnStartConnecting;
     EditText txtPhysicalAddress;
-    TextView txtState, txtByte;
-    private OkHttpClient client;
-    ExecutorService executor = Executors.newFixedThreadPool(1);
-    private LocationManager locationManager;
-    private double longitude;
-    private double latitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,58 +58,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         initializeEvents();
 
         getBoundedDevice();
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 1, this);
-        txtByte.setText("Parapet");
-
-    }
-
-    void checkNow() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                checkNearbyPlaces();
-            }
-        });
-    }
-
-    void checkNearbyPlaces() {
-        client = new OkHttpClient();
-        String postResponse = null;
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("https")
-                .host("maps.googleapis.com")
-                .addPathSegment("maps")
-                .addPathSegment("api")
-                .addPathSegment("place")
-                .addPathSegment("nearbysearch")
-                .addPathSegment("json")
-                .addQueryParameter("location", latitude + "," + longitude)
-                .addQueryParameter("radius", "100")
-                .addQueryParameter("type", "grocery_or_supermarket")
-                .addQueryParameter("key", "AIzaSyC4l3FOqCAUPYIXEfypto0ceXVZt-qR4rI")
-                .build();
-        System.out.println(url.toString());
-
-        try {
-            postResponse = doGetRequest(url.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println(postResponse);
-    }
-
-    String doGetRequest(String url) throws IOException {
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-        Response response = client.newCall(request).execute();
-        return response.body().string();
     }
 
     void getBoundedDevice() {
@@ -130,12 +75,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     void initializeComponents() {
         btnStartConnecting = (Button) findViewById(R.id.btnStartConnecting);
-        btnGetBoundedDevice = (Button) findViewById(R.id.btnGetBoundedDevice);
-        btnStartVibrate = (Button) findViewById(R.id.btnStartVibrate);
-        btnStopVibrate = (Button) findViewById(R.id.btnStopVibrate);
         txtPhysicalAddress = (EditText) findViewById(R.id.txtPhysicalAddress);
-        txtState = (TextView) findViewById(R.id.txtState);
-        txtByte = (TextView) findViewById(R.id.txtByte);
     }
 
     void initializeEvents() {
@@ -145,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 startConnecting();
             }
         });
-        btnStartVibrate.setOnClickListener(new View.OnClickListener() {
+        /*btnStartVibrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startVibrate();
@@ -162,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             public void onClick(View v) {
                 getBoundedDevice();
             }
-        });
+        });*/
     }
 
     void startConnecting() {
@@ -179,12 +119,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     void stateConnected() {
         bluetoothGatt.discoverServices();
-        txtState.setText("Connected");
+        Intent intent = new Intent(this, ReadyActivity.class);
+        startActivity(intent);
     }
 
     void stateDisconnected() {
         bluetoothGatt.disconnect();
-        txtState.setText("Disconnected");
     }
 
     void listenHeartRate() {
@@ -242,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             super.onCharacteristicRead(gatt, characteristic, status);
             Log.v("test", "onCharacteristicRead");
             byte[] data = characteristic.getValue();
-            txtByte.setText(Arrays.toString(data));
         }
 
         @Override
@@ -256,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             super.onCharacteristicChanged(gatt, characteristic);
             Log.v("test", "onCharacteristicChanged");
             byte[] data = characteristic.getValue();
-            txtByte.setText(Arrays.toString(data));
         }
 
         @Override
@@ -290,28 +228,4 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
     };
-
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.d(TAG, "LocationChanged");
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-        txtByte.setText(latitude + " " + longitude);
-        checkNow();
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-        Log.d(TAG, "StatusChanged");
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-        Log.d(TAG, "ProviderEnabled");
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-        Log.d(TAG, "ProviderDisabled");
-    }
 }
