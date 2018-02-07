@@ -1,0 +1,2 @@
+https://github.com/betomaluje/Mi-Band
+https://github.com/betomaluje/Mi-Band/wiki/MiBandService
