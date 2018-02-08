@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void stateConnected() {
-        bluetoothGatt.discoverServices();
+        //bluetoothGatt.discoverServices();
         Intent intent = new Intent(this, ReadyActivity.class);
         startActivity(intent);
     }

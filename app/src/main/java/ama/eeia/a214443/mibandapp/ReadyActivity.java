@@ -9,9 +9,19 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,17 +33,43 @@ import okhttp3.Response;
 public class ReadyActivity  extends AppCompatActivity  implements LocationListener {
 
     private static final String TAG = "MyMiBandApp";
+    public static String type = "store";
+    private Spinner spinner;
+    private Button button;
+    private TextView textView;
 
     Button btnGetBoundedDevice, btnStartVibrate, btnStopVibrate;
     private OkHttpClient client;
     ExecutorService executor = Executors.newFixedThreadPool(1);
     private LocationManager locationManager;
-    private double longitude;
-    private double latitude;
+    private double longitude = 19.47658899999999;
+    private double latitude = 51.7671891;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ready_activity);
+        spinner = (Spinner) findViewById(R.id.spinner);
+        button = (Button) findViewById(R.id.button2);
+        textView = (TextView) findViewById(R.id.textView);
+        List<String> list = new ArrayList<String>();
+        list.add("store");
+        list.add("stadium");
+        list.add("gym");
+        list.add("school");
+        list.add("police");
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
+        spinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
+
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                checkNow();
+            }
+        });
+
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -63,8 +99,8 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
                 .addPathSegment("nearbysearch")
                 .addPathSegment("json")
                 .addQueryParameter("location", latitude + "," + longitude)
-                .addQueryParameter("radius", "1000")
-                .addQueryParameter("type", "store")
+                .addQueryParameter("radius", "10000")
+                .addQueryParameter("type", type)
                 .addQueryParameter("key", "AIzaSyC4l3FOqCAUPYIXEfypto0ceXVZt-qR4rI")
                 .build();
         System.out.println(url.toString());
@@ -74,7 +110,21 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(postResponse);
+        System.out.println("Odp " + postResponse);
+        String finalPostResponse = "";
+
+        try {
+            JSONObject obj = new JSONObject(postResponse);
+            JSONArray arr = obj.getJSONArray("results");
+            for (int i = 0; i < arr.length(); i++) {
+                finalPostResponse+= arr.getJSONObject(i).getString("vicinity");
+                finalPostResponse+="\n";
+            }
+            String finalPostResponse1 = finalPostResponse;
+            runOnUiThread(() -> textView.setText(finalPostResponse1));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     String doGetRequest(String url) throws IOException {
