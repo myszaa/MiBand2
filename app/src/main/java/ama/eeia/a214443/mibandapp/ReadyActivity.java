@@ -8,10 +8,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -37,6 +40,7 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private Spinner spinner;
     private Button button;
     private TextView textView;
+    private EditText timeBetweenCheckLocationText;
 
     Button btnGetBoundedDevice, btnStartVibrate, btnStopVibrate;
     private OkHttpClient client;
@@ -44,13 +48,24 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private LocationManager locationManager;
     private double longitude = 19.47658899999999;
     private double latitude = 51.7671891;
+    long timeBetweenCheckLocation = 2000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ready_activity);
+
+        setUpVariables();
+        setUpListeners();
+        setUpLocationChange();
+    }
+
+    void setUpVariables() {
         spinner = (Spinner) findViewById(R.id.spinner);
         button = (Button) findViewById(R.id.button2);
         textView = (TextView) findViewById(R.id.textView);
+        timeBetweenCheckLocationText = findViewById(R.id.timeBetweenCheckText);
+
         List<String> list = new ArrayList<String>();
         list.add("store");
         list.add("stadium");
@@ -62,20 +77,43 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
+    }
+    void setUpListeners() {
         spinner.setOnItemSelectedListener(new CustomOnItemSelectedListener());
-
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 checkNow();
             }
         });
 
+        timeBetweenCheckLocationText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().equals("")) {
+                    return;
+                }
+                timeBetweenCheckLocation = Long.parseLong(editable.toString());
+                setUpLocationChange();
+            }
+        });
+    }
+
+    void setUpLocationChange() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 1, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, timeBetweenCheckLocation, 1, this);
     }
 
     void checkNow() {

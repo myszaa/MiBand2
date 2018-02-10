@@ -107,13 +107,15 @@ public class MainActivity extends AppCompatActivity {
 
     void startConnecting() {
 
-        String address = txtPhysicalAddress.getText().toString();
+        Intent intent = new Intent(this, ReadyActivity.class);
+        startActivity(intent);
+        /*String address = txtPhysicalAddress.getText().toString();
         bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
 
         Log.v("test", "Connecting to " + address);
         Log.v("test", "Device name " + bluetoothDevice.getName());
 
-        bluetoothGatt = bluetoothDevice.connectGatt(this, true, bluetoothGattCallback);
+        bluetoothGatt = bluetoothDevice.connectGatt(this, true, bluetoothGattCallback);*/
 
     }
 
@@ -125,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
     void stateDisconnected() {
         bluetoothGatt.disconnect();
+        Intent intent = new Intent(this, ReadyActivity.class);
+        startActivity(intent);
     }
 
     void listenHeartRate() {
