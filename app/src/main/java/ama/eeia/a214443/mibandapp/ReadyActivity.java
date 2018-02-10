@@ -41,6 +41,7 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private Button button;
     private TextView textView;
     private EditText timeBetweenCheckLocationText;
+    private EditText radiusText;
 
     Button btnGetBoundedDevice, btnStartVibrate, btnStopVibrate;
     private OkHttpClient client;
@@ -49,6 +50,8 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private double longitude = 19.47658899999999;
     private double latitude = 51.7671891;
     long timeBetweenCheckLocation = 2000;
+    private long radius = 10000;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +68,9 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         button = (Button) findViewById(R.id.button2);
         textView = (TextView) findViewById(R.id.textView);
         timeBetweenCheckLocationText = findViewById(R.id.timeBetweenCheckText);
-
+        timeBetweenCheckLocationText.setText(String.valueOf(timeBetweenCheckLocation));
+        radiusText = findViewById(R.id.radiusText);
+        radiusText.setText(String.valueOf(radius));
         List<String> list = new ArrayList<String>();
         list.add("store");
         list.add("stadium");
@@ -106,6 +111,25 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
                 setUpLocationChange();
             }
         });
+        radiusText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().equals("")) {
+                    return;
+                }
+                radius = Long.parseLong(editable.toString());
+            }
+        });
     }
 
     void setUpLocationChange() {
@@ -137,7 +161,7 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
                 .addPathSegment("nearbysearch")
                 .addPathSegment("json")
                 .addQueryParameter("location", latitude + "," + longitude)
-                .addQueryParameter("radius", "10000")
+                .addQueryParameter("radius", String.valueOf(radius))
                 .addQueryParameter("type", type)
                 .addQueryParameter("key", "AIzaSyC4l3FOqCAUPYIXEfypto0ceXVZt-qR4rI")
                 .build();

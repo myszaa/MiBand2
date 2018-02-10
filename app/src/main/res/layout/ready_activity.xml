@@ -24,7 +24,7 @@
         android:layout_marginTop="8dp"
         android:text="Szukaj"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/radiusText" />
 
     <TextView
         android:id="@+id/textView"
@@ -70,4 +70,27 @@
         app:layout_constraintEnd_toStartOf="@+id/timeBetweenCheckText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/timeBetweenCheckText" />
+
+    <EditText
+        android:id="@+id/radiusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timeBetweenCheckText" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Radius of search in meters "
+        app:layout_constraintBottom_toBottomOf="@+id/radiusText"
+        app:layout_constraintEnd_toStartOf="@+id/radiusText"
+        app:layout_constraintTop_toTopOf="@+id/radiusText" />
 </android.support.constraint.ConstraintLayout>
