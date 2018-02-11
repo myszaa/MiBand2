@@ -1,12 +1,9 @@
 package ama.eeia.a214443.mibandapp;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -16,6 +13,8 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,7 +46,6 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     public static String type = "store";
     private Spinner spinner;
     private Button button;
-    private TextView textView;
     private EditText timeBetweenCheckLocationText;
     private EditText radiusText;
     BluetoothGatt bluetoothGatt;
@@ -61,6 +58,9 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private double latitude = 51.7671891;
     long timeBetweenCheckLocation = 2000;
     private long radius = 10000;
+    private RecyclerView recyclerView;
+    private ResultsAdapter recyclerAdapter;
+    private LinearLayoutManager mLayoutManager;
 
 
     @Override
@@ -76,7 +76,10 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     void setUpVariables() {
         spinner = (Spinner) findViewById(R.id.spinner);
         button = (Button) findViewById(R.id.button2);
-        textView = (TextView) findViewById(R.id.textView);
+        recyclerView = findViewById(R.id.recyclerView);
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(new ResultsAdapter(new ArrayList<>(), this));
         timeBetweenCheckLocationText = findViewById(R.id.timeBetweenCheckText);
         timeBetweenCheckLocationText.setText(String.valueOf(timeBetweenCheckLocation));
         radiusText = findViewById(R.id.radiusText);
@@ -193,13 +196,18 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
             }
             BluetoothService.startVibrate(this);
             notifyUser();
-
+            ArrayList<String> addressList = new ArrayList<>();
             for (int i = 0; i < arr.length(); i++) {
+                addressList.add(arr.getJSONObject(i).getString("vicinity"));
                 finalPostResponse+= arr.getJSONObject(i).getString("vicinity");
                 finalPostResponse+="\n";
             }
+
             String finalPostResponse1 = finalPostResponse;
-            runOnUiThread(() -> textView.setText(finalPostResponse1));
+            //runOnUiThread(() -> textView.setText(finalPostResponse1));
+            runOnUiThread(() -> ((ResultsAdapter) recyclerView.getAdapter()).setAddresses(addressList));
+            runOnUiThread(() -> recyclerView.getAdapter().notifyDataSetChanged());
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
