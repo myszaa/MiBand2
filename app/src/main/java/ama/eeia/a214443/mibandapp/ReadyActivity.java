@@ -144,14 +144,6 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, timeBetweenCheckLocation, 1, this);
     }
 
-    void startVibrate() {
-        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.AlertNotification.service)
-                .getCharacteristic(CustomBluetoothProfile.AlertNotification.alertCharacteristic);
-        bchar.setValue(new byte[]{1});
-        if (!bluetoothGatt.writeCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed start vibrate", Toast.LENGTH_SHORT).show();
-        }
-    }
     void checkNow() {
         executor.execute(new Runnable() {
             @Override
@@ -190,6 +182,11 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         try {
             JSONObject obj = new JSONObject(postResponse);
             JSONArray arr = obj.getJSONArray("results");
+            if (arr.length() != 0) {
+                BluetoothService.startVibrate(this);
+                Thread.sleep(1000);
+                BluetoothService.stopVibrate(this);
+            }
             for (int i = 0; i < arr.length(); i++) {
                 finalPostResponse+= arr.getJSONObject(i).getString("vicinity");
                 finalPostResponse+="\n";
@@ -197,6 +194,8 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
             String finalPostResponse1 = finalPostResponse;
             runOnUiThread(() -> textView.setText(finalPostResponse1));
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
