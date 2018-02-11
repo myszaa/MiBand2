@@ -9,6 +9,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -182,11 +183,11 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         try {
             JSONObject obj = new JSONObject(postResponse);
             JSONArray arr = obj.getJSONArray("results");
-            if (arr.length() != 0) {
-                BluetoothService.startVibrate(this);
-                Thread.sleep(1000);
-                BluetoothService.stopVibrate(this);
+            if (arr.length() == 0) {
+                return;
             }
+            BluetoothService.startVibrate(this);
+
             for (int i = 0; i < arr.length(); i++) {
                 finalPostResponse+= arr.getJSONObject(i).getString("vicinity");
                 finalPostResponse+="\n";
@@ -194,8 +195,6 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
             String finalPostResponse1 = finalPostResponse;
             runOnUiThread(() -> textView.setText(finalPostResponse1));
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

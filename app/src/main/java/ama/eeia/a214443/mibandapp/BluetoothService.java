@@ -13,16 +13,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class BluetoothService {
 
-    public static BluetoothAdapter bluetoothAdapter;
+    public final static BluetoothAdapter bluetoothAdapter  = BluetoothAdapter.getDefaultAdapter();
     public static BluetoothGatt bluetoothGatt;
-    BluetoothDevice bluetoothDevice;
+    public static BluetoothDevice bluetoothDevice;
     private boolean isListeningHeartRate;
 
     public BluetoothService() {
-        initializeObjects();
     }
 
     public String getBoundedDevice() {
@@ -35,18 +35,14 @@ public class BluetoothService {
         return "";
     }
 
-    void initializeObjects() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    }
-
-    public void startConnecting(String address, BluetoothGattCallback bluetoothGattCallback, Context context) {
+    public static void startConnecting(String address, BluetoothGattCallback bluetoothGattCallback, Context context) {
 
         bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
 
         Log.v("test", "Connecting to " + address);
         Log.v("test", "Device name " + bluetoothDevice.getName());
 
-        bluetoothGatt = bluetoothDevice.connectGatt(context.getApplicationContext(), true, bluetoothGattCallback);
+        bluetoothGatt = bluetoothDevice.connectGatt(context, true, bluetoothGattCallback);
     }
 
     void listenHeartRate() {

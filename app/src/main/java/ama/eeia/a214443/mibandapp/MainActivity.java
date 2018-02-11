@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter;
     BluetoothGatt bluetoothGatt;
     BluetoothDevice bluetoothDevice;
-    BluetoothService bluetoothService;
 
     Button btnStartConnecting;
     EditText txtPhysicalAddress;
@@ -53,12 +52,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        bluetoothService = new BluetoothService();
 
         initializeComponents();
         initializeEvents();
 
-        txtPhysicalAddress.setText(bluetoothService.getBoundedDevice());
+       // txtPhysicalAddress.setText(bluetoothService.getBoundedDevice());
     }
 
     void initializeComponents() {
@@ -77,14 +75,15 @@ public class MainActivity extends AppCompatActivity {
 
     void startConnecting() {
         String address = txtPhysicalAddress.getText().toString();
-        bluetoothService.startConnecting(address, bluetoothGattCallback, this);
-        /*
-        Intent intent = new Intent(this, ReadyActivity.class);
-        startActivity(intent);
-        */
+        BluetoothService.startConnecting(address, bluetoothGattCallback, this);
+/*        Intent intent = new Intent(this, ReadyActivity.class);
+        startActivity(intent);*/
     }
 
     void stateConnected() {
+        Log.v(TAG, "Connected");
+
+
         Intent intent = new Intent(this, ReadyActivity.class);
         startActivity(intent);
     }
@@ -101,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             Log.v("test", "onConnectionStateChange");
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
+                gatt.discoverServices();
                 stateConnected();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 stateDisconnected(gatt);
@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
             super.onServicesDiscovered(gatt, status);
             Log.v("test", "onServicesDiscovered");
         }
-
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
