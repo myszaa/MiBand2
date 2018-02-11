@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter;
     BluetoothGatt bluetoothGatt;
     BluetoothDevice bluetoothDevice;
+    BluetoothService bluetoothService;
 
     Button btnStartConnecting;
     EditText txtPhysicalAddress;
@@ -52,25 +53,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bluetoothService = new BluetoothService();
 
-        initializeObjects();
         initializeComponents();
         initializeEvents();
 
-        getBoundedDevice();
-    }
-
-    void getBoundedDevice() {
-        Set<BluetoothDevice> boundedDevice = bluetoothAdapter.getBondedDevices();
-        for (BluetoothDevice bd : boundedDevice) {
-            if (bd.getName().contains("MI Band 2")) {
-                txtPhysicalAddress.setText(bd.getAddress());
-            }
-        }
-    }
-
-    void initializeObjects() {
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        txtPhysicalAddress.setText(bluetoothService.getBoundedDevice());
     }
 
     void initializeComponents() {
@@ -85,74 +73,24 @@ public class MainActivity extends AppCompatActivity {
                 startConnecting();
             }
         });
-        /*btnStartVibrate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startVibrate();
-            }
-        });
-        btnStopVibrate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopVibrate();
-            }
-        });
-        btnGetBoundedDevice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getBoundedDevice();
-            }
-        });*/
     }
 
     void startConnecting() {
-
         String address = txtPhysicalAddress.getText().toString();
-        bluetoothDevice = bluetoothAdapter.getRemoteDevice(address);
-
-        Log.v("test", "Connecting to " + address);
-        Log.v("test", "Device name " + bluetoothDevice.getName());
-
-        bluetoothGatt = bluetoothDevice.connectGatt(this, true, bluetoothGattCallback);
-
+        bluetoothService.startConnecting(address, bluetoothGattCallback, this);
+        /*
+        Intent intent = new Intent(this, ReadyActivity.class);
+        startActivity(intent);
+        */
     }
 
     void stateConnected() {
-        //bluetoothGatt.discoverServices();
         Intent intent = new Intent(this, ReadyActivity.class);
         startActivity(intent);
     }
 
-    void stateDisconnected() {
-        bluetoothGatt.disconnect();
-    }
-
-    void listenHeartRate() {
-        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.HeartRate.service)
-                .getCharacteristic(CustomBluetoothProfile.HeartRate.measurementCharacteristic);
-        bluetoothGatt.setCharacteristicNotification(bchar, true);
-        BluetoothGattDescriptor descriptor = bchar.getDescriptor(CustomBluetoothProfile.HeartRate.descriptor);
-        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-        bluetoothGatt.writeDescriptor(descriptor);
-        isListeningHeartRate = true;
-    }
-
-    void startVibrate() {
-        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.AlertNotification.service)
-                .getCharacteristic(CustomBluetoothProfile.AlertNotification.alertCharacteristic);
-        bchar.setValue(new byte[]{1});
-        if (!bluetoothGatt.writeCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed start vibrate", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    void stopVibrate() {
-        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.AlertNotification.service)
-                .getCharacteristic(CustomBluetoothProfile.AlertNotification.alertCharacteristic);
-        bchar.setValue(new byte[]{0});
-        if (!bluetoothGatt.writeCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed stop vibratee", Toast.LENGTH_SHORT).show();
-        }
+    void stateDisconnected(BluetoothGatt gatt) {
+        gatt.disconnect();
     }
 
     final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
@@ -165,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 stateConnected();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                stateDisconnected();
+                stateDisconnected(gatt);
             }
 
         }
@@ -174,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
             Log.v("test", "onServicesDiscovered");
-            listenHeartRate();
         }
 
         @Override

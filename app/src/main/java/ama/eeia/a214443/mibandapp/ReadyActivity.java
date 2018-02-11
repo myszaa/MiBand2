@@ -1,6 +1,8 @@
 package ama.eeia.a214443.mibandapp;
 
 import android.Manifest;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,6 +45,7 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
     private TextView textView;
     private EditText timeBetweenCheckLocationText;
     private EditText radiusText;
+    BluetoothGatt bluetoothGatt;
 
     Button btnGetBoundedDevice, btnStartVibrate, btnStopVibrate;
     private OkHttpClient client;
@@ -140,6 +144,14 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, timeBetweenCheckLocation, 1, this);
     }
 
+    void startVibrate() {
+        BluetoothGattCharacteristic bchar = bluetoothGatt.getService(CustomBluetoothProfile.AlertNotification.service)
+                .getCharacteristic(CustomBluetoothProfile.AlertNotification.alertCharacteristic);
+        bchar.setValue(new byte[]{1});
+        if (!bluetoothGatt.writeCharacteristic(bchar)) {
+            Toast.makeText(this, "Failed start vibrate", Toast.LENGTH_SHORT).show();
+        }
+    }
     void checkNow() {
         executor.execute(new Runnable() {
             @Override
