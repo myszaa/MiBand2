@@ -1,8 +1,13 @@
 package ama.eeia.a214443.mibandapp;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -187,6 +192,7 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
                 return;
             }
             BluetoothService.startVibrate(this);
+            notifyUser();
 
             for (int i = 0; i < arr.length(); i++) {
                 finalPostResponse+= arr.getJSONObject(i).getString("vicinity");
@@ -214,6 +220,27 @@ public class ReadyActivity  extends AppCompatActivity  implements LocationListen
         latitude = location.getLatitude();
         longitude = location.getLongitude();
         checkNow();
+    }
+
+    public void notifyUser() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+                        .setContentTitle("Found a " + type + "!")
+                        .setContentText("Click to see what it is!");
+        Intent resultIntent = new Intent(this, ReadyActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        int mNotificationId = 001;
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());
     }
 
     @Override
